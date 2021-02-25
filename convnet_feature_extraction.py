@@ -1,26 +1,20 @@
-#!/usr/bin/env python
-# coding: utf-8
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb 25 20:29:42 2021
 
-# In[1]:
-
+@author: mario
+"""
 
 import keras
 keras.__version__
 
-
-# In[2]:
-
-
 from keras.models import load_model
-
-model = load_model('fer_model.h5')
+model = load_model('fer_model_1m.h5')
 model.summary()  # As a reminder.
 
+img_path = "C:/Users/mario/Documents/coding_TA/dataset_1m/train/terkejut/frame729.jpg"
 
-# In[3]:
-
-
-img_path = "C:/Users/mario/Documents/coding_TA/dataset_new/train/senyum/frame772.jpg"
+# -----------------------------------------------------------------------
 
 # We preprocess the image into a 4D tensor
 from keras.preprocessing import image
@@ -28,9 +22,10 @@ import numpy as np
 import cv2 
 
 IMAGE_SIZE = (120,120)
+# Image filters for sharpening
 filters = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
 
-# img = image.load_img(img_path, target_size=(120, 120))
+# Image Processing with OpenCV
 img = cv2.imread(img_path)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 img = cv2.resize(img, IMAGE_SIZE)
@@ -45,19 +40,13 @@ img_tensor /= 255.
 # Its shape is (1, 120, 120, 3)
 print(img_tensor.shape)
 
-
-# In[4]:
-
-
+# Showing Imported Image
 import matplotlib.pyplot as plt
 
 plt.imshow(img_tensor[0])
 plt.show()
 
-
-# In[5]:
-
-
+# -----------------------------------------------------------------------
 from keras import models
 
 # Extracts the outputs of the top 8 layers:
@@ -66,22 +55,13 @@ layer_outputs = [layer.output for layer in model.layers[:8]]
 activation_model = models.Model(inputs=model.input, outputs=layer_outputs)
 
 
-# In[6]:
-
-
 # This will return a list of 5 Numpy arrays:
 # one array per layer activation
 activations = activation_model.predict(img_tensor)
 
 
-# In[7]:
-
-
 first_layer_activation = activations[0]
 print(first_layer_activation.shape)
-
-
-# In[8]:
 
 
 import matplotlib.pyplot as plt
@@ -90,14 +70,8 @@ plt.matshow(first_layer_activation[0, :, :, 3], cmap='viridis')
 plt.show()
 
 
-# In[9]:
-
-
 plt.matshow(first_layer_activation[0, :, :, 30], cmap='viridis')
 plt.show()
-
-
-# In[10]:
 
 
 import keras
@@ -145,10 +119,4 @@ for layer_name, layer_activation in zip(layer_names, activations):
     plt.imshow(display_grid, aspect='auto', cmap='viridis')
     
 plt.show()
-
-
-# In[ ]:
-
-
-
 

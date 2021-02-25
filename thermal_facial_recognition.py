@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
 
-# # Thermal Facial Expression Recognitions
-
-# #### Libraries
-
-# In[1]:
-
+This is a temporary script file.
+"""
 
 #!pip install scikit-learn
 #!pip install seaborn
@@ -33,35 +30,23 @@ from keras.models import Sequential
 import tensorflow as tf            
 from tqdm import tqdm
 
-
-# ### Class Indices
-
-# In[2]:
-
-
+# Class Indices
 class_names = ['marah', 'terkejut', 'normal', 'senyum']
 class_names_label = {class_name:i for i, class_name in enumerate(class_names)}
 
 nb_classes = len(class_names)
-
-# IMAGE_SIZE = (224, 224)
 IMAGE_SIZE = (120, 120)
-# IMAGE_SIZE_2 = (120, 120)
 
-
-# ### Loading Thermal Datasets
-
-# In[3]:
-
-
+# Loading the Data
 def load_data():
     """
         Load the data:
             - 400 images to train the network.
             - 80 images to evaluate how accurately the network learned to classify images.
     """
-    filters = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-    datasets = ['dataset_new/train', 'dataset_new/test']
+    filter = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+    datasets = ['C://Users//mario//Documents//coding_TA//dataset_1m//train', 
+                'C://Users//mario//Documents//coding_TA//dataset_1m//test']
     output = []
     
     # Iterate through training and test sets
@@ -87,7 +72,7 @@ def load_data():
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 image = cv2.resize(image, IMAGE_SIZE)
                 # image = image[35:224, 35:190]
-                image = cv2.filter2D(image,-1,filters)
+                image = cv2.filter2D(image,-1,filter)
                 # image = cv2.resize(image,(120,120)) 
                 
                 # Append the image and its corresponding label to the output
@@ -101,28 +86,14 @@ def load_data():
 
     return output
 
-
-# In[4]:
-
-
+# Load the Datasets
 (train_images, train_labels), (test_images, test_labels) = load_data()
 
-
-# #### Shuffle Train Dataset
-
-# In[5]:
-
-
+# Shuffle the Datasets
 train_images, train_labels = shuffle(train_images, train_labels, random_state=25)
 
 
-# ### Exploring Thermal Datasets
-
-# In[6]:
-
-
 # Exploring Datasets
-
 n_train = train_labels.shape[0]
 n_test = test_labels.shape[0]
 
@@ -131,9 +102,7 @@ print ("Number of testing examples: {}".format(n_test))
 print ("Each image is of size: {}".format(IMAGE_SIZE))
 
 
-# In[7]:
-
-
+# Data Graph
 import pandas as pd
 
 _, train_counts = np.unique(train_labels, return_counts=True)
@@ -144,10 +113,7 @@ pd.DataFrame({'train': train_counts,
             ).plot.bar()
 plt.show()
 
-
-# In[8]:
-
-
+# Pie Chart
 plt.pie(train_counts,
         explode=(0, 0, 0, 0) , 
         labels=class_names,
@@ -157,21 +123,11 @@ plt.axis('equal')
 plt.title('Proportion of each observed category')
 plt.show()
 
-
-# In[9]:
-
-
 # Data Normalization
-
 train_images = train_images / 255.0 
 test_images = test_images / 255.0
 
-
-# In[10]:
-
-
 # Visualize the Data
-
 def display_random_image(class_names, images, labels):
     """
         Display a random image from the images array and its correspond label from the labels array.
@@ -185,17 +141,10 @@ def display_random_image(class_names, images, labels):
     plt.grid(False)
     plt.title('Image #{} : '.format(index) + class_names[labels[index]])
     plt.show()
-
-
-# In[11]:
-
-
+    
 display_random_image(class_names, train_images, train_labels)
-
-
-# In[12]:
-
-
+    
+# Show 25 display examples
 def display_examples(class_names, images, labels):
     """
         Display 25 images from the images array with its corresponding labels
@@ -211,17 +160,8 @@ def display_examples(class_names, images, labels):
         plt.imshow(images[i], cmap=plt.cm.binary)
         plt.xlabel(class_names[labels[i]])
     plt.show()
-
-
-# In[13]:
-
-
+    
 display_examples(class_names, train_images, train_labels)
-
-
-# ### Convolutional Neural Networks Architecture
-
-# In[14]:
 
 
 # CNN models
@@ -250,36 +190,21 @@ model.add(Layers.Dense(1000, activation='relu'))
 
 model.add(Layers.Dense(4, activation='softmax'))
 
+
 # Compiling Model
-
 model.compile(optimizer=Optimizer.Adam(lr=0.00001),loss='sparse_categorical_crossentropy',metrics=['accuracy'])
-
 model.summary()
 
-# SVG(model_to_dot(model).create(prog='dot', format='svg'))
-# Utils.plot_model(model,to_file='model.png',show_shapes=True)
-
-
-# ### Model Fitting 
-
-# In[15]:
-
-
+# Model Fitting
 history = model.fit(train_images, 
                     train_labels, 
                     batch_size=16, 
                     epochs=100, 
-                    validation_split=0.2
-                    )
+                    validation_split=0.2)
 
 # If train accuracy < validation accuracy, please STOP model training process.
 
-
-# ### Accuracy & Validation
-
-# In[22]:
-
-
+# Plot Accuracy
 def plot_accuracy_loss(history):
     """
         Plot the accuracy and the loss during the training of the nn.
@@ -305,35 +230,23 @@ def plot_accuracy_loss(history):
 
     plt.legend()
     plt.show()
-
-
-# In[23]:
-
-
+    
 plot_accuracy_loss(history)
 
-
-# In[24]:
-
-
+# Evaluating the Models
 loss, acc = model.evaluate(test_images, test_labels)
 
 print("System Accuracy : {0:.2f}%".format(acc*100))
 print("System Loss : {0:.5f}".format(loss))
 
-
-# In[25]:
-
-
+# Highest Prediction from Models
 predictions = model.predict(test_images)     # Vector of probabilities
 pred_labels = np.argmax(predictions, axis = 1) # We take the highest probability
 
 display_random_image(class_names, test_images, pred_labels)
 
 
-# In[26]:
-
-
+# Mislabeled Images
 def print_mislabeled_images(class_names, test_images, test_labels, pred_labels):
     """
         Print 25 examples of mislabeled images by the classifier, e.g when test_labels != pred_labels
@@ -345,19 +258,10 @@ def print_mislabeled_images(class_names, test_images, test_labels, pred_labels):
 
     title = "Some examples of mislabeled images by the classifier:"
     display_examples(class_names,  mislabeled_images, mislabeled_labels)
-
-
-# In[27]:
-
-
+    
 print_mislabeled_images(class_names, test_images, test_labels, pred_labels)
 
-
-# ### Confusion Matrix
-
-# In[28]:
-
-
+# Confusion Matrix
 CM = confusion_matrix(test_labels, pred_labels)
 ax = plt.axes()
 sn.heatmap(CM, annot=True, 
@@ -367,19 +271,5 @@ sn.heatmap(CM, annot=True,
 ax.set_title('Confusion matrix')
 plt.show()
 
-
-# ## Saving Model
-
-# In[29]:
-
-
-# !mkdir -p savedmodel
-# model.save('savedmodel/thermalfer01')
-model.save('fer_model.h5')
-
-
-# In[ ]:
-
-
-
-
+# Saving Model
+model.save('fer_model_1m.h5')
